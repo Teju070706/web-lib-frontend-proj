@@ -88,17 +88,16 @@ router.put('/:id', authenticate, async (req, res) => {
 // Delete review
 router.delete('/:id', authenticate, async (req, res) => {
     try {
-        const review = await Review.findOneAndDelete({
-            _id: req.params.id,
-            $or: [
-                { userId: req.user._id },
-                { userId: req.user._id }
-            ]
-        });
+        let review;
 
         // Allow admin to delete any review
         if (req.user.role === 'admin') {
-            await Review.findByIdAndDelete(req.params.id);
+            review = await Review.findByIdAndDelete(req.params.id);
+        } else {
+            review = await Review.findOneAndDelete({
+                _id: req.params.id,
+                userId: req.user._id
+            });
         }
 
         if (!review) {
