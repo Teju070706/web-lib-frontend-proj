@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BookOpen, Search, Users, Download, Star, ArrowRight, GraduationCap, FileText, Beaker, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ThemeToggle';
+import api from '@/services/api';
+import { Resource } from '@/types';
 
 const stats = [
   { label: 'Resources', value: '12,000+', icon: BookOpen },
@@ -41,6 +44,37 @@ const fadeUp = {
 };
 
 const LandingPage = () => {
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [subjects, setSubjects] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Try to fetch from backend
+        const [resourcesRes, subjectsRes] = await Promise.all([
+          api.getResources({ limit: 8 }),
+          api.getSubjects()
+        ]);
+        setResources(resourcesRes.resources);
+        setSubjects(subjectsRes);
+      } catch (error) {
+        console.log('Using mock data - backend not connected');
+        // Fallback to mock data if backend not available
+        setSubjects(['Mathematics', 'Computer Science', 'Physics', 'Biology', 'Chemistry', 'Literature', 'History', 'Economics']);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Update category counts based on fetched subjects
+  const getCategoryCount = (name: string) => {
+    if (loading) return 0;
+    return categories.find(c => c.name === name)?.count || 0;
+  };
+
   return (
     <div className="min-h-screen">
       {/* Nav */}
@@ -162,7 +196,7 @@ const LandingPage = () => {
         <div className="container mx-auto">
           <div className="text-center mb-14">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Browse by Subject</h2>
-            <p className="text-muted-foreground">Explore resources across 8+ academic disciplines.</p>
+            <p className="text-muted-foreground">Explore resources across {subjects.length}+ academic disciplines.</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((c, i) => (
