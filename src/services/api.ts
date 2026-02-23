@@ -92,7 +92,7 @@ class ApiService {
             });
         }
         const query = queryParams.toString();
-        return this.request<{ resources: Resource[]; pagination: any }>(
+        return this.request<{ resources: Resource[]; pagination: { page: number; limit: number; total: number; pages: number } }>(
             `/resources${query ? `?${query}` : ''}`
         );
     }
