@@ -17,16 +17,21 @@ interface Props {
   onClose: () => void;
   isBookmarked: boolean;
   onToggleBookmark: () => void;
+  onDownload?: () => void;
 }
 
-const ResourceDetailModal = ({ resource, onClose, isBookmarked, onToggleBookmark }: Props) => {
+const ResourceDetailModal = ({ resource, onClose, isBookmarked, onToggleBookmark, onDownload }: Props) => {
   const { toast } = useToast();
   const [userRating, setUserRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const reviews = mockReviews.filter(r => r.resourceId === resource.id);
 
   const handleDownload = () => {
-    toast({ title: 'Download started', description: `${resource.title} is being downloaded.` });
+    if (onDownload) {
+      onDownload();
+    } else {
+      toast({ title: 'Download started', description: `${resource.title} is being downloaded.` });
+    }
   };
 
   const handleSubmitReview = () => {

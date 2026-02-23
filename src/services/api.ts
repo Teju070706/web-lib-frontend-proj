@@ -113,6 +113,36 @@ class ApiService {
         return this.request<string[]>('/resources/meta/subjects');
     }
 
+    // Upload new resource
+    async uploadResource(data: {
+        title: string;
+        description: string;
+        type: string;
+        subject: string;
+        gradeLevel: string;
+        fileUrl: string;
+        fileSize: string;
+        language: string;
+        tags: string[];
+    }) {
+        return this.request<Resource>('/resources', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    // Get user's uploaded resources
+    async getMyResources() {
+        return this.request<Resource[]>('/resources/my-resources');
+    }
+
+    // Download resource (increment count)
+    async downloadResource(resourceId: string) {
+        return this.request<Resource>(`/resources/${resourceId}/download`, {
+            method: 'POST',
+        });
+    }
+
     // User endpoints
     async getUserBookmarks() {
         return this.request<Resource[]>('/users/bookmarks');

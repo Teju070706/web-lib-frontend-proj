@@ -72,18 +72,36 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Create resource (admin only)
-router.post('/', authenticate, adminOnly, async (req, res) => {
+// Create resource (admin or user)
+router.post('/', authenticate, async (req, res) => {
     try {
         const resource = new Resource({
             ...req.body,
-            uploadedBy: req.user._id
+            uploadedBy: req.user._id,
+            isApproved: req.user.role === 'admin' // Auto-approve admin uploads
         });
 
         await resource.save();
+
+        // Populate the uploadedBy field before returning
+        await resource.populate('uploadedBy', 'name email');
+
         res.status(201).json(resource);
     } catch (error) {
         res.status(500).json({ message: 'Error creating resource', error: error.message });
+    }
+});
+
+// Get current user's uploaded resources
+router.get('/my-resources', authenticate, async (req, res) => {
+    try {
+        const resources = await Resource.find({ uploadedBy: req.user._id })
+            .populate('uploadedBy', 'name email')
+            .sort({ uploadedAt: -1 });
+
+        res.json(resources);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user resources', error: error.message });
     }
 });
 
